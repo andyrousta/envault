@@ -1,9 +1,12 @@
 import { Command } from 'commander';
-import { initCommand } from './init';
-import { setCommand } from './set';
-import { getCommand } from './get';
-import { listCommand } from './list';
-import { deleteCommand } from './delete';
+import { initCmd } from './init';
+import { setCmd } from './set';
+import { getCmd } from './get';
+import { listCmd } from './list';
+import { deleteCmd } from './delete';
+import { exportCmd } from './export';
+import { importCmd } from './import';
+import { copyCmd } from './copy';
 
 const program = new Command();
 
@@ -12,31 +15,26 @@ program
   .description('Securely store and sync environment variables using encrypted local vaults')
   .version('1.0.0');
 
-program
-  .command('init')
-  .description('Initialize a new encrypted vault in the current directory')
-  .action(initCommand);
+program.command('init').description('Initialize a new vault').action(initCmd);
+
+program.command('set <key> <value>').description('Set a variable in the vault').action(setCmd);
+
+program.command('get <key>').description('Get a variable from the vault').action(getCmd);
+
+program.command('list').description('List all keys in the vault').action(listCmd);
+
+program.command('delete <key>').description('Delete a variable from the vault').action(deleteCmd);
+
+program.command('export').description('Export vault variables to stdout as .env format').action(exportCmd);
 
 program
-  .command('set <key>')
-  .description('Set an environment variable in the vault')
-  .action((key: string) => setCommand(key));
+  .command('import <file>')
+  .description('Import variables from a .env file into the vault')
+  .action(importCmd);
 
 program
-  .command('get <key>')
-  .description('Get and decrypt an environment variable from the vault')
-  .action((key: string) => getCommand(key));
-
-program
-  .command('list')
-  .description('List all keys stored in the vault')
-  .option('-s, --show-values', 'Decrypt and display values', false)
-  .action((opts) => listCommand(opts.showValues));
-
-program
-  .command('delete <key>')
-  .description('Delete an environment variable from the vault')
-  .option('-f, --force', 'Skip confirmation prompt', false)
-  .action((key: string, opts) => deleteCommand(key, opts.force));
+  .command('copy <sourceKey> <destKey>')
+  .description('Copy a variable to a new key within the vault')
+  .action(copyCmd);
 
 export { program };
