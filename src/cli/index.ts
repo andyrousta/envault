@@ -12,28 +12,31 @@ import { renameCommand } from "./rename";
 import { searchCommand } from "./search";
 import { tagCommand } from "./tag";
 import { diffCommand } from "./diff";
+import { auditCommand } from "./audit";
+import { vaultPath } from "../vault";
 
 export function buildCli(): Command {
   const program = new Command();
+  program.name("envault").description("Encrypted local environment variable vault").version("1.0.0");
 
-  program.name("envault").description("Securely store and sync environment variables").version("1.0.0");
-
-  program.command("init").description("Initialize a new vault").action(initCommand);
-  program.command("set <key> <value>").description("Set a variable").action(setCommand);
-  program.command("get <key>").description("Get a variable").action(getCommand);
-  program.command("list").description("List all variables").action(listCommand);
-  program.command("delete <key>").description("Delete a variable").action(deleteCommand);
-  program.command("export").description("Export vault to .env format").action(exportCommand);
-  program.command("import <file>").description("Import from a .env file").action(importCommand);
-  program.command("copy <key>").description("Copy a value to clipboard").action(copyCommand);
-  program.command("rotate").description("Rotate the master password").action(rotateCommand);
-  program.command("rename <oldKey> <newKey>").description("Rename a key").action(renameCommand);
-  program.command("search <term>").description("Search keys and values").action(searchCommand);
-  program.command("tag <key> [tags...]").description("Tag a key").action(tagCommand);
+  program.command("init").description("Initialize a new vault").action(() => initCommand(vaultPath()));
+  program.command("set <key>").description("Set a vault entry").action((key) => setCommand(vaultPath(), key));
+  program.command("get <key>").description("Get a vault entry").action((key) => getCommand(vaultPath(), key));
+  program.command("list").description("List all vault keys").action(() => listCommand(vaultPath()));
+  program.command("delete <key>").description("Delete a vault entry").action((key) => deleteCommand(vaultPath(), key));
+  program.command("export").description("Export vault to .env format").action(() => exportCommand(vaultPath()));
+  program.command("import <file>").description("Import from a .env file").action((file) => importCommand(vaultPath(), file));
+  program.command("copy <src> <dest>").description("Copy an entry to a new key").action((src, dest) => copyCommand(vaultPath(), src, dest));
+  program.command("rotate").description("Re-encrypt vault with a new password").action(() => rotateCommand(vaultPath()));
+  program.command("rename <oldKey> <newKey>").description("Rename a vault key").action((o, n) => renameCommand(vaultPath(), o, n));
+  program.command("search <term>").description("Search vault keys").action((term) => searchCommand(vaultPath(), term));
+  program.command("tag <key>").description("Add or remove tags on a key").action((key) => tagCommand(vaultPath(), key));
+  program.command("diff <otherVault>").description("Diff two vaults").action((other) => diffCommand(vaultPath(), other));
   program
-    .command("diff <otherVaultPath>")
-    .description("Diff local vault against another vault file")
-    .action(diffCommand);
+    .command("audit")
+    .description("Audit vault for issues (empty values, duplicates, untagged keys)")
+    .option("--json", "Output report as JSON")
+    .action((opts) => auditCommand(vaultPath(), { json: opts.json }));
 
   return program;
 }
