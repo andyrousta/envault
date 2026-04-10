@@ -8,31 +8,32 @@ import { exportCommand } from './export';
 import { importCommand } from './import';
 import { copyCommand } from './copy';
 import { rotateCommand } from './rotate';
-
-const DEFAULT_VAULT = '.envault';
+import { renameCommand } from './rename';
 
 export function buildCli(): Command {
   const program = new Command();
 
-  program.name('envault').description('Securely store and sync environment variables').version('1.0.0');
+  program.name('envault').description('Encrypted local environment variable vault').version('1.0.0');
 
-  program.command('init').description('Initialize a new vault').action(() => initCommand(DEFAULT_VAULT));
+  program.command('init').description('Initialize a new vault').option('-v, --vault <path>', 'Vault file path', '.envault').action((opts) => initCommand(opts));
 
-  program.command('set <key>').description('Set a variable in the vault').action((key: string) => setCommand(key, DEFAULT_VAULT));
+  program.command('set <key> <value>').description('Set a key in the vault').option('-v, --vault <path>', 'Vault file path', '.envault').option('-p, --password <password>', 'Vault password').action((key, value, opts) => setCommand(key, value, opts));
 
-  program.command('get <key>').description('Get a variable from the vault').action((key: string) => getCommand(key, DEFAULT_VAULT));
+  program.command('get <key>').description('Get a key from the vault').option('-v, --vault <path>', 'Vault file path', '.envault').option('-p, --password <password>', 'Vault password').action((key, opts) => getCommand(key, opts));
 
-  program.command('list').description('List all keys in the vault').action(() => listCommand(DEFAULT_VAULT));
+  program.command('list').description('List all keys in the vault').option('-v, --vault <path>', 'Vault file path', '.envault').option('-p, --password <password>', 'Vault password').action((opts) => listCommand(opts));
 
-  program.command('delete <key>').description('Delete a variable from the vault').action((key: string) => deleteCommand(key, DEFAULT_VAULT));
+  program.command('delete <key>').description('Delete a key from the vault').option('-v, --vault <path>', 'Vault file path', '.envault').option('-p, --password <password>', 'Vault password').action((key, opts) => deleteCommand(key, opts));
 
-  program.command('export').description('Export vault entries to a .env file').action(() => exportCommand(DEFAULT_VAULT));
+  program.command('export').description('Export vault as .env format').option('-v, --vault <path>', 'Vault file path', '.envault').option('-p, --password <password>', 'Vault password').option('-o, --output <file>', 'Output file').action((opts) => exportCommand(opts));
 
-  program.command('import').description('Import entries from a .env file into the vault').action(() => importCommand(DEFAULT_VAULT));
+  program.command('import <file>').description('Import a .env file into the vault').option('-v, --vault <path>', 'Vault file path', '.envault').option('-p, --password <password>', 'Vault password').action((file, opts) => importCommand(file, opts));
 
-  program.command('copy <key> <dest>').description('Copy a vault entry to another vault').action((key: string, dest: string) => copyCommand(key, DEFAULT_VAULT, dest));
+  program.command('copy <key>').description('Copy a key value to clipboard').option('-v, --vault <path>', 'Vault file path', '.envault').option('-p, --password <password>', 'Vault password').action((key, opts) => copyCommand(key, opts));
 
-  program.command('rotate').description('Rotate the master password for the vault').action(() => rotateCommand(DEFAULT_VAULT));
+  program.command('rotate').description('Rotate the vault password').option('-v, --vault <path>', 'Vault file path', '.envault').action((opts) => rotateCommand(opts));
+
+  program.command('rename <old-key> <new-key>').description('Rename a key in the vault').option('-v, --vault <path>', 'Vault file path', '.envault').option('-p, --password <password>', 'Vault password').action((oldKey, newKey, opts) => renameCommand(oldKey, newKey, opts));
 
   return program;
 }
