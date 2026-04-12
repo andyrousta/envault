@@ -43,6 +43,11 @@ describe("lintEntries", () => {
     const issues = lintEntries({ VALID_KEY: "str0ng-p@ssw0rd!" });
     expect(issues).toHaveLength(0);
   });
+
+  it("returns an empty array for an empty entries object", () => {
+    const issues = lintEntries({});
+    expect(issues).toHaveLength(0);
+  });
 });
 
 describe("registerLintCommand", () => {
@@ -73,6 +78,19 @@ describe("registerLintCommand", () => {
     registerLintCommand(program);
     await program.parseAsync(["node", "test", "lint", "--project", "test"]);
     expect(consoleSpy).toHaveBeenCalled();
+    expect(exitSpy).toHaveBeenCalledWith(1);
+  });
+
+  it("exits with code 1 when there are only warnings", async () => {
+    vi.spyOn(vaultModule, "readVault").mockResolvedValue({
+      entries: [{ key: "WEAK_KEY", value: "password", tags: [] }],
+    } as any);
+
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {}) as any);
+    const program = new Command();
+    registerLintCommand(program);
+    await program.parseAsync(["node", "test", "lint", "--project", "test"]);
     expect(exitSpy).toHaveBeenCalledWith(1);
   });
 });
