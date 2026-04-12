@@ -45,3 +45,9 @@ test("diff-vaults alias invokes compare logic", async () => {
   expect(diffCmd).toBeDefined();
   logSpy.mockRestore();
 });
+
+test("registerCompareCommand is called once per program registration", () => {
+  const mockRegister = compareModule.registerCompareCommand as jest.Mock;
+  makeProgram();
+  expect(mockRegister).toHaveBeenCalledTimes(1);
+});
