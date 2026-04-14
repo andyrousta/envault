@@ -17,9 +17,10 @@ envault compare <vaultA> <vaultB> [options]
 
 ## Options
 
-| Option        | Description                              |
-|---------------|------------------------------------------|
-| `--only-keys` | Show only key names, not their values    |
+| Option          | Description                                        |
+|-----------------|----------------------------------------------------|
+| `--only-keys`   | Show only key names, not their values              |
+| `--output <fmt>`| Output format: `text` (default) or `json`          |
 
 ## Output Format
 
@@ -29,6 +30,18 @@ envault compare <vaultA> <vaultB> [options]
 
 If no differences are found, the message `Vaults are identical.` is displayed.
 
+### JSON Output
+
+When using `--output json`, the result is a structured object suitable for scripting:
+
+```json
+{
+  "onlyInA": ["KEY_ONE"],
+  "onlyInB": ["KEY_TWO"],
+  "changed": ["KEY_THREE"]
+}
+```
+
 ## Examples
 
 ```bash
@@ -37,9 +50,13 @@ envault compare .env.vault .env.vault.backup
 
 # Show only changed key names
 envault compare staging.vault production.vault --only-keys
+
+# Output differences as JSON for use in scripts
+envault compare staging.vault production.vault --output json
 ```
 
 ## Notes
 
 - Each vault is decrypted independently; you will be prompted for each password.
 - Useful for auditing drift between environments (e.g., staging vs. production).
+- Exit code `0` is returned when vaults are identical; `1` when differences are found.
