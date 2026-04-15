@@ -1,46 +1,51 @@
-# `envault rename` Command
+# envault rename
 
 Rename an existing key in the vault without changing its value.
 
 ## Usage
 
-```bash
-envault rename <old-key> <new-key> [options]
+```
+envault rename <oldKey> <newKey> [options]
+```
+
+## Aliases
+
+```
+envault mv <oldKey> <newKey> [options]
 ```
 
 ## Arguments
 
-| Argument    | Description                        |
-|-------------|------------------------------------|
-| `old-key`   | The existing key name to rename    |
-| `new-key`   | The new key name to assign         |
+| Argument  | Description                        |
+|-----------|------------------------------------|
+| `oldKey`  | The current name of the vault key  |
+| `newKey`  | The new name to assign to the key  |
 
 ## Options
 
-| Option              | Description                              |
-|---------------------|------------------------------------------|
-| `-v, --vault <path>`| Path to vault file (default: `.envault`) |
-| `-p, --password`    | Vault password (prompted if omitted)     |
+| Option           | Description                            |
+|------------------|----------------------------------------|
+| `-p, --path`     | Path to the vault file (optional)      |
 
 ## Examples
 
-```bash
-# Rename a key interactively
-envault rename API_KEY THIRD_PARTY_API_KEY
-
-# Rename using a specific vault file
-envault rename DB_URL DATABASE_URL --vault .envault.staging
+Rename a key interactively:
+```
+envault rename DATABASE_URL DB_URL
 ```
 
-## Behavior
+Rename using the `mv` alias:
+```
+envault mv API_KEY API_SECRET
+```
 
-- Prompts for the vault password if `--password` is not provided.
-- If the `<new-key>` already exists, you will be asked to confirm the overwrite.
-- The original key is removed and the value is preserved under the new key.
-- The vault is re-encrypted and saved after a successful rename.
+Rename a key in a specific vault:
+```
+envault rename OLD_TOKEN NEW_TOKEN --path ./staging.vault
+```
 
-## Error Cases
+## Notes
 
-- Exits with an error if the vault file does not exist.
-- Exits with an error if `<old-key>` is not found in the vault.
-- Exits with an error if decryption fails (wrong password).
+- If `newKey` already exists in the vault, the command will abort to prevent accidental overwrites.
+- You will be prompted for the vault password to decrypt and re-encrypt the vault.
+- The value associated with the key is preserved exactly as stored.
