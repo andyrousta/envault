@@ -53,6 +53,11 @@ export async function rotateCommand(vaultFile: string): Promise<void> {
     process.exit(1);
   }
 
+  if (newPassword === oldPassword) {
+    console.error('New password must be different from the current password.');
+    process.exit(1);
+  }
+
   const reEncrypted: Record<string, string> = {};
   for (const [key, encryptedValue] of Object.entries(vault)) {
     const plaintext = decrypt(encryptedValue, oldPassword);
